@@ -8,16 +8,26 @@ import org.kde.plasma.core as PlasmaCore
 import org.kde.plasma.plasmoid 2.0
 
 PlasmoidItem {
+    id: base
+    //States
     property bool cfg_showActiveIcon: Plasmoid.configuration.showActiveIcon
     property bool cfg_showInactiveIcon: Plasmoid.configuration.showInactiveIcon
     property bool cfg_showActiveIndex: Plasmoid.configuration.showActiveIndex
     property bool cfg_showInactiveIndex: Plasmoid.configuration.showInactiveIndex
 
-    Component.onCompleted: {
-        console.log("FormFactor", Plasmoid.formFactor);
-        console.log("CFG:");
-        console.log(cfg_showActiveIcon);
-    }
+    //Colors
+    property string cfg_activeBackgroundColor: Plasmoid.configuration.activeBackgroundColor
+    property string cfg_inActiveBackgroundColor: Plasmoid.configuration.inActiveBackgroundColor
+    property string cfg_activeBorderColor: Plasmoid.configuration.activeBorderColor
+    property string cfg_inActiveBorderColor: Plasmoid.configuration.inActiveBorderColor
+    property string cfg_activeTextColor: Plasmoid.configuration.activeTextColor
+    property string cfg_inActiveTextColor: Plasmoid.configuration.inActiveTextColor
+    //Ignore list
+    property list<string> cfg_ignoreList: Plasmoid.configuration.ignoreList
+
+    // Component.onCompleted: {
+    //     pager.setIgnoreList(cfg_ignoreList);
+    // }
 
     preferredRepresentation: compactRepresentation
 
@@ -54,16 +64,17 @@ PlasmoidItem {
                     width: windowRow.width + 15
                     height: 25
                     border.width: 1
-                    border.color: index == repeater.activeIndex ? "pink" : "black"
+                    border.color: index == repeater.activeIndex ? cfg_activeBorderColor : cfg_inActiveBorderColor
+
                     radius: 75
-                    color: "#291f39"
+                    color: index == repeater.activeIndex ? cfg_activeBackgroundColor : cfg_inActiveBackgroundColor
 
                     Row {
                         id: windowRow
                         anchors.centerIn: parent
                         spacing: 5
                         Kirigami.Icon {
-                            // visible: index === repeater.activeIndex
+                            visible: index == repeater.activeIndex ? cfg_showActiveIcon : cfg_showInactiveIcon
                             source: repeater.desktopFileNames[index]
                             anchors.verticalCenter: parent.verticalCenter
                             width: 20
@@ -71,35 +82,27 @@ PlasmoidItem {
                         }
 
                         Text {
-                            color: "white"
-                            text: Math.floor(repeater.xPositions[index])
-                            // text: () => {
-                            //     if (activeIndex === index) {
-                            //         if (showActiveIndex)
-                            //             return index + 1;
-                            //         else
-                            //             return "";
-                            //     } else {
-                            //         if (showInctiveIndex) {
-                            //             return index + 1;
-                            //         }
-                            //         return "";
-                            //     }
-                            // }
+                            color: repeater.activeIndex === index ? cfg_activeTextColor : cfg_inActiveTextColor
+                            //For Debugging
+                            // text: Math.floor(repeater.xPositions[index])
+                            text: index === repeater.activeIndex ? cfg_showActiveIndex ? index + 1 : "" : cfg_showInactiveIndex ? index + 1 : ""
                         }
                     }
                 }
             }
-            Pager {
-                id: pager
-                onUpdate: (activeIndex, windowArr, desktopFileNames, xPositions) => {
-                    console.log(desktopFileNames);
-                    console.log(xPositions);
-                    repeater.desktopFileNames = desktopFileNames;
-                    repeater.model = windowArr.length || 0;
-                    repeater.activeIndex = activeIndex;
-                    repeater.xPositions = xPositions;
-                }
+        }
+        Pager {
+            id: pager
+            Component.onCompleted: {
+                pager.setIgnoreList(cfg_ignoreList);
+            }
+            onUpdate: (activeIndex, windowArr, desktopFileNames, xPositions) => {
+                console.log(desktopFileNames);
+                console.log(xPositions);
+                repeater.desktopFileNames = desktopFileNames;
+                repeater.model = windowArr.length || 0;
+                repeater.activeIndex = activeIndex;
+                repeater.xPositions = xPositions;
             }
         }
     }

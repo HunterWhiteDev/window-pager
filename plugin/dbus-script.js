@@ -2,12 +2,13 @@ let closingWindowId = null;
 
 function sendData() {
   const windows = workspace.stackingOrder;
-  print("cid: ", closingWindowId);
 
   let windowData = [];
+  const resourceClasses = [];
 
   let isClosingIdPresent = false;
   for (const window of windows) {
+    resourceClasses.push(window.resourceClass);
     if (window.internalId === closingWindowId) isClosingIdPresent = true;
     if (window.normalWindow && window.internalId !== closingWindowId) {
       windowData.push({
@@ -18,6 +19,7 @@ function sendData() {
         xPos: window.frameGeometry.x,
         active: window.active,
         desktopFileName: window.desktopFileName || "",
+        resourceClass: window.resourceClass,
       });
     }
     if (!isClosingIdPresent) closingWindowId = null;
@@ -30,6 +32,8 @@ function sendData() {
     "pass",
     JSON.stringify({ data: windowData }),
   );
+
+  print("pager-resource-classes: ", JSON.stringify(resourceClasses));
 }
 
 function windowAdded(window) {
