@@ -37,6 +37,7 @@ public:
   QList<Window> previousWindows;
   QList<QString> previousDesktopNames;
   QString ignoreList;
+  QList<QString> closedWindowIds;
 
   void checkScript();
   void debounceEmit();

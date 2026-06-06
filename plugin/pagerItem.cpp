@@ -176,6 +176,14 @@ void PagerItem::handlePassedData(QString data) {
         compare = 0;
     }
 
+    for (QString closedId : closedWindowIds) {
+      // Check if window has been closed, if it has, set compore = 0 so it can
+      // be ignored in being added to the list
+      if (closedId.compare(QString::fromStdString(internalIdString)) == 0) {
+        compare = 0;
+      }
+    }
+
     // Only include the window if its not in our ignore list
     if (compare != 0) {
 
@@ -240,32 +248,9 @@ void PagerItem::handlePassedData(QString data) {
 }
 
 void PagerItem::handleClose(QString data) {
-  isClosing = true;
-
-  // qDebug() << "We got the close signal";
-  // qDebug() << data;
 
   string id = cJSON_GetObjectItem(cJSON_Parse(&data.toStdString()[0]), "id")
                   ->valuestring;
 
-  QList<Window> newWindows;
-  QList<int> indexes;
-  QList<QString> desktopFileNames;
-
-  QList<double> xPositions;
-
-  int counter = 0;
-  for (Window window : previousWindows) {
-    if (window.internalId != id) {
-      newWindows.push_back(window);
-      indexes.push_back(counter);
-      desktopFileNames.push_back(window.desktopFileName);
-      xPositions.push_back(window.xPos);
-      counter++;
-    }
-  }
-  previousWindows = newWindows;
-
-  Q_EMIT update(previousActiveIndex, indexes, desktopFileNames, xPositions);
-  isClosing = false;
+  closedWindowIds.push_back(QString::fromStdString(id));
 }
