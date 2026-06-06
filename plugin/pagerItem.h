@@ -14,6 +14,7 @@ typedef struct {
   double xPos;
   bool active;
   QString desktopFileName;
+  string resourceClass;
 
 } Window;
 
@@ -35,9 +36,13 @@ public:
   int previousActiveIndex;
   QList<Window> previousWindows;
   QList<QString> previousDesktopNames;
+  QString ignoreList;
 
   void checkScript();
   void debounceEmit();
+
+  Q_INVOKABLE
+  void setIgnoreList(QString ignoreList);
 
 Q_SIGNALS:
   void update(int activeIndex, QList<int> windowArr,

@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <kcfg xmlns="http://www.kde.org/standards/kcfg/1.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.kde.org/standards/kcfg/1.0 http://www.kde.org/standards/kcfg/1.0/kcfg.xsd">
-    <kcfgfile name=""/>
+    <kcfgfile name="windowpager"/>
     <group name="General">
         <entry name="showActiveIcon" type="Bool">
             <default>true</default>
@@ -13,6 +13,27 @@
         </entry>
         <entry name="showInactiveIndex" type="Bool">
             <default>true</default>
+        </entry>
+        <entry name="activeBackgroundColor" type="String">
+            <default>#291f39</default>
+        </entry>
+        <entry name="inActiveBackgroundColor" type="String">
+            <default>#291f39</default>
+        </entry>
+        <entry name="activeBorderColor" type="String">
+            <default>#FF00E8</default>
+        </entry>
+        <entry name="inActiveBorderColor" type="String">
+            <default>black</default>
+        </entry>
+        <entry name="activeTextColor" type="String">
+            <default>white</default>
+        </entry>
+        <entry name="inActiveTextColor" type="String">
+            <default>white</default>
+        </entry>
+       <entry name="ignoreList" type="StringList">
+            <default>krunner,plasmashell</default>
         </entry>
     </group>
 </kcfg>

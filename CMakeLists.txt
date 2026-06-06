@@ -22,6 +22,8 @@ include(KDEInstallDirs)
 include(KDECMakeSettings)
 include(KDECompilerSettings NO_POLICY_SCOPE)
 
+find_package(Plasma REQUIRED)
+
 find_package(Qt6 REQUIRED COMPONENTS
    CONFIG REQUIRED
     Core
@@ -67,6 +69,7 @@ target_link_libraries(windowpager
         Qt6::Widgets
         Qt6::DBus
         KF6::ConfigCore
+        Plasma::Plasma
 )
 
 qt_add_qml_module(windowpager

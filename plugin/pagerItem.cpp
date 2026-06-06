@@ -2,6 +2,8 @@
 #include "DBusService.h"
 #include "cJSON.h"
 #include <KConfig>
+#include <KConfigGroup>
+#include <Plasma/Plasma>
 #include <QDBusConnection>
 #include <QDBusMessage>
 #include <QDebug>
@@ -10,7 +12,6 @@
 #include <QString>
 #include <bits/stdc++.h>
 #include <cstdlib>
-#include <kconfig.h>
 #include <qcontainerfwd.h>
 #include <qdbusconnection.h>
 #include <qlist.h>
@@ -20,18 +21,35 @@
 #include <qobject.h>
 #include <qobjectdefs.h>
 #include <qtmetamacros.h>
+#include <qvariant.h>
 #include <string>
 #include <unistd.h>
+#include <vector>
 
 using namespace std;
 using namespace chrono;
+
+std::vector<std::string> split(const std::string &str, char delimiter) {
+  std::vector<std::string> tokens;
+  size_t start = 0;
+  size_t end = str.find(delimiter);
+
+  while (end != std::string::npos) {
+    tokens.push_back(str.substr(start, end - start));
+    start = end + 1;
+    end = str.find(delimiter, start);
+  }
+
+  tokens.push_back(str.substr(start));
+  return tokens;
+}
 
 bool compareByXpos(const Window &a, const Window &b) {
   return a.xPos <= b.xPos;
 }
 
 PagerItem::PagerItem(QObject *parent)
-    : QObject(parent), dbusSuccess(false), isClosing(false),
+    : QObject(parent), dbusSuccess(false), isClosing(false), ignoreList(),
       dbusService(parent) {
 
   QObject::connect(&dbusService, &DBusService::dataPassed, this,
@@ -46,6 +64,10 @@ PagerItem::PagerItem(QObject *parent)
 
   registerDBusService();
   checkScript();
+}
+
+void PagerItem::setIgnoreList(QString ignoreList) {
+  PagerItem::ignoreList = ignoreList;
 }
 
 void PagerItem::registerDBusService() {
@@ -86,33 +108,33 @@ void PagerItem::checkScript() {
     result += buffer.data();
   }
   result = result.substr(0, result.size() - 1);
-  qDebug() << "result";
-  qDebug() << result;
 
-  // We need to load the script
-  //
+  // If falese We need to load the script
   if (result == "false") {
-    qDebug() << "Result is false";
     std::string cmd = "qdbus org.kde.KWin /Scripting "
                       "org.kde.kwin.Scripting.loadScript /home/";
     cmd += username;
     cmd += "/.local/share/window-pager/dbus-script.js";
 
     system(&cmd[0]);
-  } else {
-    qDebug() << "result is true";
   }
 }
 
 void PagerItem::handlePassedData(QString data) {
+
   if (isClosing)
     return;
 
-  KConfig config;
-  // KConfigGroup configGroup =
-  //     config.group(QString::fromStdString("dev.hunterwhite.pager"));
+  // QVariant ignoreList = parent()->parent()->property("cfg_ignoreList");
+  // QList<QString> ignoreList =
+  //     parent()->property("cfg_ignoreList").toStringList();
+  //
 
-  qDebug() << "Got data";
+  qDebug() << ignoreList;
+
+  vector<string> splitList = split(&ignoreList.toStdString()[0], ',');
+  qDebug() << "Split List: ";
+  qDebug() << splitList;
 
   string dataStdString = data.toStdString();
   // Parse raw data
@@ -139,19 +161,41 @@ void PagerItem::handlePassedData(QString data) {
     double xPosDouble = xPos->valuedouble;
     bool activeBool = cJSON_IsTrue(active);
     string desktopFileNameString = desktopFileName->valuestring;
+    string resourceClass =
+        cJSON_GetObjectItem(window, "resourceClass")->valuestring;
+    qDebug() << "RC: " << resourceClass;
 
-    indexes.push_back(counter);
+    int compare = -1;
 
-    Window window{"",
-                  minimizedBool,
-                  internalIdString,
-                  xPosDouble,
-                  activeBool,
-                  QString::fromStdString(desktopFileNameString)};
+    for (string str : splitList) {
 
-    windows.push_back(window);
+      // Compare every single string in our splitList, if any string is equal,
+      // we set the outer scoped compare int to 0 so it can be ignored
+      // the .compare("") is for non window elements like the snap preview
+      if (str.compare(resourceClass) == 0 || resourceClass.compare("") == 0)
+        compare = 0;
+    }
 
-    counter++;
+    // Only include the window if its not in our ignore list
+    if (compare != 0) {
+
+      qDebug() << "Class: " << resourceClass;
+      qDebug() << "Compare: " << compare;
+      indexes.push_back(counter);
+
+      Window window{"",
+                    minimizedBool,
+                    internalIdString,
+                    xPosDouble,
+                    activeBool,
+                    QString::fromStdString(desktopFileNameString),
+                    resourceClass};
+
+      windows.push_back(window);
+
+      counter++;
+    }
+    compare = -1;
   }
 
   std::sort(windows.begin(), windows.end(), compareByXpos);
@@ -177,10 +221,11 @@ void PagerItem::handlePassedData(QString data) {
 
     desktopFileNames.push_back(window.desktopFileName);
     xPositions.push_back(window.xPos);
-    qDebug() << window.desktopFileName << " " << window.xPos;
 
     sortedCounter++;
   }
+
+  qDebug() << "sc" << sortedCounter;
 
   // if activeIndex changes we know we immedietely need to update
   if (activeIndex != previousActiveIndex) {
@@ -197,8 +242,8 @@ void PagerItem::handlePassedData(QString data) {
 void PagerItem::handleClose(QString data) {
   isClosing = true;
 
-  qDebug() << "We got the close signal";
-  qDebug() << data;
+  // qDebug() << "We got the close signal";
+  // qDebug() << data;
 
   string id = cJSON_GetObjectItem(cJSON_Parse(&data.toStdString()[0]), "id")
                   ->valuestring;
