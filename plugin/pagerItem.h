@@ -8,13 +8,13 @@
 using namespace std;
 
 typedef struct {
-  string caption;
+  QString caption;
   bool minimized;
   string internalId;
   double xPos;
   bool active;
   QString desktopFileName;
-  string resourceClass;
+  QString resourceClass;
 
 } Window;
 
@@ -47,7 +47,8 @@ public:
 
 Q_SIGNALS:
   void update(int activeIndex, QList<int> windowArr,
-              QList<QString> desktopFileNames, QList<double> xPositions);
+              QList<QString> desktopFileNames, QList<double> xPositions,
+              QList<QString> captions, QList<QString> resourceClasses);
 
 private:
   DBusService dbusService;
