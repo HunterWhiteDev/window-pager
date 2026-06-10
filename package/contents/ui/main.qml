@@ -25,11 +25,10 @@ PlasmoidItem {
     //Ignore list
     property list<string> cfg_ignoreList: Plasmoid.configuration.ignoreList
 
-    // Component.onCompleted: {
-    //     pager.setIgnoreList(cfg_ignoreList);
-    // }
-
     preferredRepresentation: compactRepresentation
+
+    toolTipMainText: "" // set to empty to prevent automatic tooltip generation through compactRepresentation
+    toolTipSubText: ""
 
     fullRepresentation: Item {
         Layout.preferredWidth: 1200 * PlasmaCore.Units.devicePixelRatio
@@ -53,12 +52,15 @@ PlasmoidItem {
                 width: parent.width
                 property list<string> desktopFileNames: [""]
                 property list<double> xPositions: []
+                property list<string> captions: []
+                property list<string> resourceClasses: []
 
                 property int activeIndex
 
                 model: 0
 
                 Rectangle {
+
                     required property int index
 
                     width: windowRow.width + 15
@@ -69,23 +71,34 @@ PlasmoidItem {
                     radius: 75
                     color: index == repeater.activeIndex ? cfg_activeBackgroundColor : cfg_inActiveBackgroundColor
 
-                    Row {
-                        id: windowRow
+                    PlasmaComponents3.ToolButton {
+                        anchors.fill: parent
                         anchors.centerIn: parent
-                        spacing: 5
-                        Kirigami.Icon {
-                            visible: index == repeater.activeIndex ? cfg_showActiveIcon : cfg_showInactiveIcon
-                            source: repeater.desktopFileNames[index]
-                            anchors.verticalCenter: parent.verticalCenter
-                            width: 20
-                            height: 20
+
+                        PlasmaCore.ToolTipArea {
+                            anchors.fill: parent
+                            mainText: repeater.captions[index]
+                            subText: `Resource Class: ${repeater.resourceClasses[index]}`
                         }
 
-                        Text {
-                            color: repeater.activeIndex === index ? cfg_activeTextColor : cfg_inActiveTextColor
-                            //For Debugging
-                            // text: Math.floor(repeater.xPositions[index])
-                            text: index === repeater.activeIndex ? cfg_showActiveIndex ? index + 1 : "" : cfg_showInactiveIndex ? index + 1 : ""
+                        Row {
+                            id: windowRow
+                            anchors.centerIn: parent
+                            spacing: 5
+                            Kirigami.Icon {
+                                visible: index == repeater.activeIndex ? cfg_showActiveIcon : cfg_showInactiveIcon
+                                source: repeater.desktopFileNames[index]
+                                anchors.verticalCenter: parent.verticalCenter
+                                width: 20
+                                height: 20
+                            }
+
+                            Text {
+                                color: repeater.activeIndex === index ? cfg_activeTextColor : cfg_inActiveTextColor
+                                //For Debugging
+                                // text: Math.floor(repeater.xPositions[index])
+                                text: index === repeater.activeIndex ? cfg_showActiveIndex ? index + 1 : "" : cfg_showInactiveIndex ? index + 1 : ""
+                            }
                         }
                     }
                 }
@@ -96,13 +109,14 @@ PlasmoidItem {
             Component.onCompleted: {
                 pager.setIgnoreList(cfg_ignoreList);
             }
-            onUpdate: (activeIndex, windowArr, desktopFileNames, xPositions) => {
-                console.log(desktopFileNames);
-                console.log(xPositions);
+            onUpdate: (activeIndex, windowArr, desktopFileNames, xPositions, captions, resourceClasses) => {
+                console.log(captions);
                 repeater.desktopFileNames = desktopFileNames;
                 repeater.model = windowArr.length || 0;
                 repeater.activeIndex = activeIndex;
                 repeater.xPositions = xPositions;
+                repeater.captions = captions;
+                repeater.resourceClasses = resourceClasses;
             }
         }
     }

@@ -133,8 +133,6 @@ void PagerItem::handlePassedData(QString data) {
   qDebug() << ignoreList;
 
   vector<string> splitList = split(&ignoreList.toStdString()[0], ',');
-  qDebug() << "Split List: ";
-  qDebug() << splitList;
 
   string dataStdString = data.toStdString();
   // Parse raw data
@@ -147,6 +145,8 @@ void PagerItem::handlePassedData(QString data) {
 
   QList<Window> windows;
   QList<int> indexes;
+  QList<QString> captions;
+  QList<QString> resourceClasses;
 
   int counter = 0;
   cJSON_ArrayForEach(window, windowData) {
@@ -163,7 +163,9 @@ void PagerItem::handlePassedData(QString data) {
     string desktopFileNameString = desktopFileName->valuestring;
     string resourceClass =
         cJSON_GetObjectItem(window, "resourceClass")->valuestring;
-    qDebug() << "RC: " << resourceClass;
+    string caption = cJSON_GetObjectItem(window, "caption")->valuestring;
+
+    qDebug() << "caption" << caption;
 
     int compare = -1;
 
@@ -191,13 +193,13 @@ void PagerItem::handlePassedData(QString data) {
       qDebug() << "Compare: " << compare;
       indexes.push_back(counter);
 
-      Window window{"",
+      Window window{QString::fromStdString(caption),
                     minimizedBool,
                     internalIdString,
                     xPosDouble,
                     activeBool,
                     QString::fromStdString(desktopFileNameString),
-                    resourceClass};
+                    QString::fromStdString(resourceClass)};
 
       windows.push_back(window);
 
@@ -229,6 +231,8 @@ void PagerItem::handlePassedData(QString data) {
 
     desktopFileNames.push_back(window.desktopFileName);
     xPositions.push_back(window.xPos);
+    captions.push_back(window.caption);
+    resourceClasses.push_back(window.resourceClass);
 
     sortedCounter++;
   }
@@ -243,7 +247,8 @@ void PagerItem::handlePassedData(QString data) {
   previousActiveIndex = activeIndex;
 
   if (willEmit) {
-    Q_EMIT update(activeIndex, indexes, desktopFileNames, xPositions);
+    Q_EMIT update(activeIndex, indexes, desktopFileNames, xPositions, captions,
+                  resourceClasses);
   }
 }
 
