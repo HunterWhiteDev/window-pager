@@ -13,7 +13,7 @@ function sendData() {
     if (window.normalWindow && window.internalId !== closingWindowId) {
       windowData.push({
         pos: window.pos,
-        caption: window.caption(false),
+        caption: window.caption,
         minimized: window.minimized,
         internalId: window.internalId,
         xPos: window.frameGeometry.x,
