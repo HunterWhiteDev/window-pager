@@ -96,7 +96,6 @@ set(HOME_DIR $ENV{HOME})
 
 file(MAKE_DIRECTORY ${HOME_DIR}/.local/share/window-pager)
 
-file(COPY plugin/dbus-script.js DESTINATION ${HOME_DIR}/.local/share/window-pager)
 
 install(TARGETS windowpager DESTINATION ${KDE_INSTALL_QMLDIR}/dev/hunterwhite/pager)
 install(FILES plugin/qmldir DESTINATION ${KDE_INSTALL_QMLDIR}/dev/hunterwhite/pager)

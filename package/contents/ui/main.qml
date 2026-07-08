@@ -78,7 +78,7 @@ PlasmoidItem {
                         PlasmaCore.ToolTipArea {
                             anchors.fill: parent
                             mainText: repeater.captions[index]
-                            subText: `Resource Class: ${repeater.resourceClasses[index]}`
+                            subText: `Resource Class: ${repeater.resourceClasses[index]}\n xPos: ${repeater.xPositions[index]}`
                         }
 
                         Row {
@@ -109,14 +109,24 @@ PlasmoidItem {
             Component.onCompleted: {
                 pager.setIgnoreList(cfg_ignoreList);
             }
-            onUpdate: (activeIndex, windowArr, desktopFileNames, xPositions, captions, resourceClasses) => {
-                console.log(captions);
-                repeater.desktopFileNames = desktopFileNames;
-                repeater.model = windowArr.length || 0;
-                repeater.activeIndex = activeIndex;
+            onUpdate: (data) => {
+                const jsonData = JSON.parse(data).data;
+                console.log("PG:");
+                repeater.model = jsonData.length;
+
+                const xPositions = [];
+                const resourceNames = [];
+                const captions = [];
+                for(const column of jsonData) {
+                    xPositions.push(column.xPosStart);
+                    for(const windowData of column.windows) {
+                        resourceNames.push(windowData.resourceName);
+                        captions.push(windowData.caption);
+                    }
+                }
+                repeater.resourceClasses = resourceNames;
                 repeater.xPositions = xPositions;
                 repeater.captions = captions;
-                repeater.resourceClasses = resourceClasses;
             }
         }
     }

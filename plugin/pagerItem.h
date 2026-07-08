@@ -46,9 +46,7 @@ public:
   void setIgnoreList(QString ignoreList);
 
 Q_SIGNALS:
-  void update(int activeIndex, QList<int> windowArr,
-              QList<QString> desktopFileNames, QList<double> xPositions,
-              QList<QString> captions, QList<QString> resourceClasses);
+  void update(QString data);
 
 private:
   DBusService dbusService;
