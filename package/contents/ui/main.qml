@@ -22,8 +22,8 @@ PlasmoidItem {
     property string cfg_inActiveBorderColor: Plasmoid.configuration.inActiveBorderColor
     property string cfg_activeTextColor: Plasmoid.configuration.activeTextColor
     property string cfg_inActiveTextColor: Plasmoid.configuration.inActiveTextColor
-    //Ignore list
-    property list<string> cfg_ignoreList: Plasmoid.configuration.ignoreList
+    property string cfg_activeIndexColor: Plasmoid.configuration.activeIndexColor
+    property string cfg_inActiveIndexColor: Plasmoid.configuration.inActiveIndexColor
 
     preferredRepresentation: compactRepresentation
 
@@ -37,7 +37,6 @@ PlasmoidItem {
 
     compactRepresentation: Item {
         Layout.minimumWidth: row.implicitWidth 
-        //implicitHeight: row.implicitHeight
 
         Row {
             id: row
@@ -51,21 +50,27 @@ PlasmoidItem {
                 
                 model: null
 
-
-
                 delegate: Rectangle {
 
+                    //Column
                     id: rect
+                    required property int index
                     required property string xPosStart 
                     required property var windows 
+                    property bool active: {
+                        for(const window of windows) {
+                            if(window.active) return true;
+                        }
+                       return false; 
+                    } 
                     
 
-                    implicitWidth: column.implicitWidth + 10
+                    implicitWidth: column.implicitWidth + 15
                     implicitHeight: column.implicitHeight + 7.5
                     border.width: 1
-                    border.color:  cfg_activeBorderColor 
+                    border.color:  rect.active ? cfg_activeBorderColor : cfg_inActiveBorderColor 
                     radius: 75
-                    color:  cfg_activeBackgroundColor 
+                    color:  rect.active? cfg_activeBackgroundColor : cfg_inActiveBackgroundColor 
                     PlasmaComponents3.ToolButton {
                         anchors.fill: parent
                         anchors.centerIn: parent
@@ -75,11 +80,24 @@ PlasmoidItem {
                             mainText: "ToolTip" 
                             subText: `subtext`
                         }
+ 
 
                         Column {
                           anchors.centerIn: parent
                           id: column
                           spacing: 2
+
+                         Row {
+                          Text {
+                            visible: {
+                                if(!cfg_showInactiveIndex && !rect.active) return false;
+                                if(cfg_showActiveIndex && rect.active) return true;
+                                if(cfg_showActiveIndex && !rect.active) return false;
+                                if(!cfg_showInactiveIndex && rect.active) return false;
+                            }
+                            text: index
+                            color: rect.active ? cfg_activeIndexColor : cfg_inActiveIndexColor
+                          }
 
                           Repeater {
 
@@ -99,34 +117,18 @@ PlasmoidItem {
                             // property bool active: false
 
 
-
-                            
-                           //  states: [State {
-                           //      when: active
-                           //      PropertyChanges {
-                           //        rect.border.color: cfg_activeBorderColor
-                           //      }
-                           //  }, 
-                           //  State {
-                           //      when: !active
-                           //      PropertyChanges {
-                           //        rect.border.color: cfg_inActiveBorderColor
-                           //      }
-                           //
-                           //  }
-                           // ]
-
-
                              Kirigami.Icon {
                                 source: windowRow.desktopFileName 
                                 width: 20
                                 height: 20
                              }
                              Text {
-                                color: cfg_activeTextColor 
+                                color: rect.active ? cfg_activeTextColor : cfg_inActiveTextColor  
                                 text: windowRow.resourceName 
-                              }
-                            }
+                               }
+                             }
+                          }
+
                           }
                        }
                     }

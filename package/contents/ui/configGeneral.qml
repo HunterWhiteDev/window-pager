@@ -16,8 +16,9 @@ KCM.SimpleKCM {
     property alias cfg_inActiveBorderColor: inActiveBorderColor.text
     property alias cfg_activeTextColor: activeTextColor.text
     property alias cfg_inActiveTextColor: inActiveTextColor.text
-    //Ignore List
-    property alias cfg_ignoreList: ignoreList.text
+
+    property alias cfg_activeIndexColor: activeIndexColor.text
+    property alias cfg_inActiveIndexColor: inActiveIndexColor.text
 
     Kirigami.FormLayout {
         id: page
@@ -73,19 +74,26 @@ KCM.SimpleKCM {
         QQC2.TextField {
             id: activeTextColor
 
-            Kirigami.FormData.label: "Color for the index in the active window"
+            Kirigami.FormData.label: "Color for the text in the active window"
         }
 
         QQC2.TextField {
             id: inActiveTextColor
 
-            Kirigami.FormData.label: "Color for the index in the inactive windows"
+            Kirigami.FormData.label: "Color for the text in the inactive windows"
+        }
+
+
+        QQC2.TextField {
+            id: activeIndexColor
+
+            Kirigami.FormData.label: "Color for the index in the active window"
         }
 
         QQC2.TextField {
-            id: ignoreList
+            id: inActiveIndexColor
 
-            Kirigami.FormData.label: "Comma seperated list of window resourcce classes to avoid including"
+            Kirigami.FormData.label: "Color for the index in the inactive windows"
         }
 
     }

@@ -32,8 +32,11 @@
         <entry name="inActiveTextColor" type="String">
             <default>white</default>
         </entry>
-       <entry name="ignoreList" type="StringList">
-            <default>krunner,plasmashell</default>
+        <entry name="activeIndexColor" type="String">
+            <default>white</default>
+        </entry>
+        <entry name="inActiveIndexColor" type="String">
+            <default>white</default>
         </entry>
     </group>
 </kcfg>
