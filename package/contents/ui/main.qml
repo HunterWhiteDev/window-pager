@@ -31,14 +31,12 @@ PlasmoidItem {
     toolTipSubText: ""
 
     fullRepresentation: Item {
-        Layout.preferredWidth: 1200 * PlasmaCore.Units.devicePixelRatio
-        Layout.preferredHeight: 480 * PlasmaCore.Units.devicePixelRatio
+        // Layout.preferredWidth: 1200 * PlasmaCore.Units.devicePixelRatio
+        // Layout.preferredHeight: 480 * PlasmaCore.Units.devicePixelRatio
     }
 
     compactRepresentation: Item {
-        implicitWidth: row.implicitWidth
-        implicitHeight: row.implicitHeight
-        Layout.minimumWidth: 200
+        Layout.minimumWidth: row.implicitWidth 
         anchors.verticalCenter: parent.verticalCenter
 
         Row {
@@ -50,56 +48,87 @@ PlasmoidItem {
                 id: repeater
                 anchors.centerIn: parent
                 width: parent.width
-                property list<string> desktopFileNames: [""]
-                property list<double> xPositions: []
-                property list<string> captions: []
-                property list<string> resourceClasses: []
+                
+                model: null
 
-                property int activeIndex
 
-                model: 0
 
-                Rectangle {
+                delegate: Rectangle {
 
-                    required property int index
+                    id: rect
+                    required property string xPosStart 
+                    required property var windows 
+                    
 
-                    width: windowRow.width + 15
-                    height: 25
+                    implicitWidth: column.implicitWidth + 10
+                    implicitHeight: column.implicitHeight + 10
                     border.width: 1
-                    border.color: index == repeater.activeIndex ? cfg_activeBorderColor : cfg_inActiveBorderColor
-
+                    border.color:  cfg_activeBorderColor 
                     radius: 75
-                    color: index == repeater.activeIndex ? cfg_activeBackgroundColor : cfg_inActiveBackgroundColor
-
+                    color:  cfg_activeBackgroundColor 
                     PlasmaComponents3.ToolButton {
                         anchors.fill: parent
                         anchors.centerIn: parent
 
                         PlasmaCore.ToolTipArea {
                             anchors.fill: parent
-                            mainText: repeater.captions[index]
-                            subText: `Resource Class: ${repeater.resourceClasses[index]}\n xPos: ${repeater.xPositions[index]}`
+                            mainText: "ToolTip" 
+                            subText: `subtext`
                         }
 
-                        Row {
+                        Column {
+                          anchors.centerIn: parent
+                          id: column
+                          spacing: 2
+
+                          Repeater {
+
+                            id: windowRepeater
+                            model: rect.windows
+
+
+                            delegate: Row { 
+
+
+                            required property int index
                             id: windowRow
-                            anchors.centerIn: parent
-                            spacing: 5
-                            Kirigami.Icon {
-                                visible: index == repeater.activeIndex ? cfg_showActiveIcon : cfg_showInactiveIcon
-                                source: repeater.desktopFileNames[index]
-                                anchors.verticalCenter: parent.verticalCenter
+                            visible: index === 0 ? true : false
+
+                            required property string desktopFileName
+                            required property string resourceName 
+                            // property bool active: false
+
+
+
+                            
+                           //  states: [State {
+                           //      when: active
+                           //      PropertyChanges {
+                           //        rect.border.color: cfg_activeBorderColor
+                           //      }
+                           //  }, 
+                           //  State {
+                           //      when: !active
+                           //      PropertyChanges {
+                           //        rect.border.color: cfg_inActiveBorderColor
+                           //      }
+                           //
+                           //  }
+                           // ]
+
+
+                             Kirigami.Icon {
+                                source: windowRow.desktopFileName 
                                 width: 20
                                 height: 20
+                             }
+                             Text {
+                                color: cfg_activeTextColor 
+                                text: windowRow.resourceName 
+                              }
                             }
-
-                            Text {
-                                color: repeater.activeIndex === index ? cfg_activeTextColor : cfg_inActiveTextColor
-                                //For Debugging
-                                // text: Math.floor(repeater.xPositions[index])
-                                text: index === repeater.activeIndex ? cfg_showActiveIndex ? index + 1 : "" : cfg_showInactiveIndex ? index + 1 : ""
-                            }
-                        }
+                          }
+                       }
                     }
                 }
             }
@@ -111,22 +140,7 @@ PlasmoidItem {
             }
             onUpdate: (data) => {
                 const jsonData = JSON.parse(data).data;
-                console.log("PG:");
-                repeater.model = jsonData.length;
-
-                const xPositions = [];
-                const resourceNames = [];
-                const captions = [];
-                for(const column of jsonData) {
-                    xPositions.push(column.xPosStart);
-                    for(const windowData of column.windows) {
-                        resourceNames.push(windowData.resourceName);
-                        captions.push(windowData.caption);
-                    }
-                }
-                repeater.resourceClasses = resourceNames;
-                repeater.xPositions = xPositions;
-                repeater.captions = captions;
+                repeater.model = jsonData;
             }
         }
     }
