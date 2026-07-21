@@ -37,7 +37,7 @@ PlasmoidItem {
 
     compactRepresentation: Item {
         Layout.minimumWidth: row.implicitWidth 
-        anchors.verticalCenter: parent.verticalCenter
+        //implicitHeight: row.implicitHeight
 
         Row {
             id: row
@@ -61,7 +61,7 @@ PlasmoidItem {
                     
 
                     implicitWidth: column.implicitWidth + 10
-                    implicitHeight: column.implicitHeight + 10
+                    implicitHeight: column.implicitHeight + 7.5
                     border.width: 1
                     border.color:  cfg_activeBorderColor 
                     radius: 75
